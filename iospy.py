@@ -12,6 +12,7 @@ from skimage import exposure
 import matplotlib.pyplot as plt
 import seaborn as sns
 import cv2
+import sys
 import os
 sns.set_style('white')
 
@@ -43,7 +44,7 @@ def read_data(filepath, dFrame = True):
     nPixels = width * height
     print 'Resolution:{0}x{1}'.format(width, height)
     print 'Number of pixels:', nPixels
-
+    sys.stdout.flush()
     trialframes = []
     for frameno in range(0, nFrames+1):
 
@@ -54,6 +55,7 @@ def read_data(filepath, dFrame = True):
         trialframes.append(frame)
 
     print 'Number of processed frames:', len(trialframes)
+    sys.stdout.flush()
     darkframe = trialframes[nFrames]
     if dFrame:
         for frameno, frame in enumerate(trialframes):
@@ -138,6 +140,7 @@ def process_ref(mouse,date):
 def process_single_odorant(mouse, date, odorant):
 
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
+    #path = 'R:/Rinberglab/rinberglabspace/Edmund/intrinsic-imaging/{0}/{0}_{1}_{2}'.format(mouse, date, odorant)
     odor_averaged = []
     tsmcount = 0
 
@@ -145,7 +148,8 @@ def process_single_odorant(mouse, date, odorant):
         if not tsm.endswith('tsm'):
             continue
         tsmcount += 1
-        trialframes = read_data(ospath.join(path,tsm))
+        print 'processing file no. 1: {0}'.format(tsm)
+        trialframes = read_data(os.path.join(path,tsm))
         odor_normed = compute_average(trialframes,t1=500, t2=len(trialframes))
         odor_final = process_average(odor_normed,row1=5)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
@@ -157,7 +161,7 @@ def process_single_odorant(mouse, date, odorant):
         average_final = np.mean(odor_averaged, axis=0)
         average_final = process_average(average_final, row1=5)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_averaged.tif'.format(mouse, date, odorant)), average_final)
-        plt.imshow(odor_final)
+        plt.imshow(average_final)
         plt.show()
         pass
     else:
