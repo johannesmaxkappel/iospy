@@ -131,10 +131,16 @@ def process_average(odor_normed,
 
 def process_ref(mouse,date):
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_ref'.format(mouse,date)
-    ref_frames = read_data(path)
-    ref_average = np.mean(ref_frames, axis=0)
-    ref_average = process_average(ref_average, lowpass=False)
-    cv2.imwrite(os.path.join(path, 'ref_{0}_{1}.png'.format(mouse, date)), ref_average)
+    tsmcount = 0
+    for tsm in os.listdir(path):
+        if not tsm.endswith('tsm'):
+            continue
+        tsmcount += 1
+        print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
+        ref_frames = read_data(os.path.join(path, tsm))
+        ref_average = np.mean(ref_frames, axis=0)
+        ref_average = process_average(ref_average, lowpass=False)
+        cv2.imwrite(os.path.join(path, 'ref_{0}_{1}.png'.format(mouse, date)), ref_average)
     pass
 
 def process_single_odorant(mouse, date, odorant):
@@ -148,7 +154,7 @@ def process_single_odorant(mouse, date, odorant):
         if not tsm.endswith('tsm'):
             continue
         tsmcount += 1
-        print 'processing file no. 1: {0}'.format(tsm)
+        print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
         trialframes = read_data(os.path.join(path,tsm))
         odor_normed = compute_average(trialframes,t1=500, t2=len(trialframes))
         odor_final = process_average(odor_normed,row1=5)
