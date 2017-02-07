@@ -32,7 +32,7 @@ def mask_image(img):
 def create_projection(img, imgname, imgsource, bmp=False):
     assert os.path.exists(os.path.join('C:/voyeur_rig_config','Matrix.pkl')), \
         'No Matrix.pkl in cwd!'
-    matrix = open('Matrix.pkl', 'rb')
+    matrix = open(os.path.join('C:/voyeur_rig_config','Matrix.pkl'), 'rb')
     CAM2DMD = p.load(matrix)
     img = mask_image(img)
     warpim = cv2.warpPerspective(img, CAM2DMD, (684, 608), borderMode=1, borderValue=1)
