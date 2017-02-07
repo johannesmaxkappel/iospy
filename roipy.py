@@ -11,8 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def mask_image(img):
-    assert os.path.exists(img), \
-        'Path does not exist!'
+
     assert os.path.exists(os.path.join('C:/voyeur_rig_config','PolygonMask.png')), \
         'No PolygonMask.png in voyeur_rig_config!'
     maskimg = cv2.imread('PolygonMask.png')
