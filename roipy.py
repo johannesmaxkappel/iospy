@@ -56,8 +56,8 @@ def shift_frame(img,rowshift, colshift):
     img = img[rowshift:height + rowshift, 0:width] * (2 ** 16)
     return img
 
-def shiftandwarp(mouse, rowshift=0, colshift=0):
-    path = 'C:/VoyeurData/{0}/spots'.format(mouse)
+def shiftandwarp(mouse, date, rowshift=0, colshift=0):
+    path = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
     assert os.path.exists(path), 'Path for {0} does not exist!'.format(mouse)
     for imgname in os.listdir(path):
 
