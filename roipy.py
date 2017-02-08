@@ -11,10 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def mask_image(img):
-
-    assert os.path.exists(os.path.join('C:/voyeur_rig_config','PolygonMask.png')), \
-        'No PolygonMask.png in voyeur_rig_config!'
-    maskimg = cv2.imread('PolygonMask.png')
+    path = 'C:/voyeur_rig_config/PolygonMask.png'
+    assert os.path.exists(path), 'No PolygonMask.png in voyeur_rig_config!'
+    maskimg = cv2.imread(path)
     maskimg = cv2.cvtColor(maskimg, cv2.COLOR_BGR2GRAY)
     y, x = np.where(maskimg == 255)
 
@@ -29,21 +28,21 @@ def mask_image(img):
     pass
 
 def create_projection(img, imgname, imgsource, bmp=False):
-    assert os.path.exists(os.path.join('C:/voyeur_rig_config','Matrix.pkl')), \
-        'No Matrix.pkl in cwd!'
-    matrix = open(os.path.join('C:/voyeur_rig_config','Matrix.pkl'), 'rb')
+    matrixpath = 'C:/voyeur_rig_config/Matrix.pkl'
+    assert os.path.exists(matrixpath), 'No Matrix.pkl in cwd!'
+    matrix = open((matrixpath), 'rb')
     CAM2DMD = p.load(matrix)
     img = mask_image(img)
-    warpim = cv2.warpPerspective(img, CAM2DMD, (684, 608), borderMode=1, borderValue=1)
+    warpimg = cv2.warpPerspective(img, CAM2DMD, (684, 608), borderMode=1, borderValue=1)
     # switch rows and columns
-    warpim = np.transpose(warpim)
-    for y, row in enumerate(warpim):
+    warpimg = np.transpose(warpimg)
+    for y, row in enumerate(warpimg):
         for x, value in enumerate(row):
             if not value in [0, 255]:
-                warpim[y][x] = 255
+                warpimg[y][x] = 255
     if bmp:
-        cv2.imwrite(os.path.join(imgsource, 'transformed_{0}.bmp'.format(imgname.split('.')[0])), warpim)
-    cv2.imwrite(os.path.join(imgsource, 'transformed_{0}.png'.format(imgname.split('.')[0])), warpim)
+        cv2.imwrite(os.path.join(imgsource, 'transformed_{0}.bmp'.format(imgname.split('.')[0])), warpimg)
+    cv2.imwrite(os.path.join(imgsource, 'transformed_{0}.png'.format(imgname.split('.')[0])), warpimg)
     pass
 
 def shift_frame(img,rowshift, colshift):
@@ -57,18 +56,23 @@ def shift_frame(img,rowshift, colshift):
 
 def shiftandwarp(mouse, date, rowshift=0, colshift=0):
     path = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
+    refimg = False
     assert os.path.exists(path), 'Path for {0} does not exist!'.format(mouse)
     for imgname in os.listdir(path):
 
         if imgname.startswith('ref'):
+            refimg = True
             img = plt.imread(os.path.join(path, imgname))
             img = shift_frame(img,rowshift,colshift)
             cv2.imwrite(os.path.join(path, 'shifted_{0}.png'.format(imgname.split('.')[0])), img.astype('uint16'))
         elif imgname.startswith('Mask'):
+            print 'Transforming image: {0}'.format(imgname)
             img = plt.imread(os.path.join(path, imgname))
             assert len( np.unique( img ) ) == 2, 'Data format not binary!'
             img = shift_frame(img,rowshift,colshift)
             create_projection(img, imgname, path)
         else:
             continue
+    if not refimg:
+        print 'WARNING: No reference image was shifted!'
     pass
