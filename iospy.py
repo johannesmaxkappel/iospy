@@ -182,6 +182,17 @@ def process_single_odorant(mouse, date, odorant, ref=True):
     else:
         pass
 
+def process_imaging_sess(mouse, date):
+    path = 'C:/Turbo-SM/SMDATA/'
+    for imgfolder in os.listdir(path):
+        if imgfolder.startswith('{0}_{1}'.format(mouse, date)):
+            if imgfolder.endswith('ref'):
+                continue
+            odorant = imgfolder.split('_')[2]
+            process_single_odorant(mouse, date, odorant, ref=False)
+    process_ref(mouse, date)
+    pass
+
 # def read_h5(mouse, date, session):
 #     for h5 in [x for x in os.listdir(self.path) if x.endswith('h5')]:
 #         odordict = h5py.File(os.path.join(self.path, h5), 'r')
