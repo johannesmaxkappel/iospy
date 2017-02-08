@@ -10,7 +10,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def mask_image(img):
+
     path = 'C:/voyeur_rig_config/PolygonMask.png'
     assert os.path.exists(path), 'No PolygonMask.png in voyeur_rig_config!'
     maskimg = cv2.imread(path)
@@ -27,7 +29,9 @@ def mask_image(img):
            mask['dx_start']:mask['dx_stop']]
     pass
 
+
 def create_projection(img, imgname, imgsource, bmp=False):
+
     matrixpath = 'C:/voyeur_rig_config/Matrix.pkl'
     assert os.path.exists(matrixpath), 'No Matrix.pkl in cwd!'
     matrix = open((matrixpath), 'rb')
@@ -45,7 +49,9 @@ def create_projection(img, imgname, imgsource, bmp=False):
     cv2.imwrite(os.path.join(imgsource, 'transformed_{0}.png'.format(imgname.split('.')[0])), warpimg)
     pass
 
+
 def shift_frame(img,rowshift, colshift):
+
     ### shifting rows and columns to move spots into FOS ###
     width, height = img.shape
     print 'Rows shifted: {0}. Columns shifted: {1}.'.format(rowshift, colshift)
@@ -54,7 +60,9 @@ def shift_frame(img,rowshift, colshift):
     img = img[rowshift:height + rowshift, 0:width] * (2 ** 16)
     return img
 
-def shiftandwarp(mouse, date, rowshift=0, colshift=0):
+
+def transform_masks(mouse, date, rowshift=0, colshift=0):
+
     path = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
     refimg = False
     assert os.path.exists(path), 'Path for {0} does not exist!'.format(mouse)
@@ -64,7 +72,8 @@ def shiftandwarp(mouse, date, rowshift=0, colshift=0):
             refimg = True
             img = plt.imread(os.path.join(path, imgname))
             img = shift_frame(img,rowshift,colshift)
-            cv2.imwrite(os.path.join(path, 'shifted_{0}.png'.format(imgname.split('.')[0])), img.astype('uint16'))
+            img = img.astype('uint16')
+            cv2.imwrite(os.path.join(path, 'shifted_{0}.png'.format(imgname.split('.')[0])), img)
         elif imgname.startswith('Mask'):
             print 'Transforming image: {0}'.format(imgname)
             img = plt.imread(os.path.join(path, imgname))

@@ -63,6 +63,7 @@ def read_data(filepath, dFrame = True):
             trialframes[frameno] = frame
     return trialframes
 
+
 def compute_average(trialframes, t1=500, t2=1600):
 
     blframes_mean = np.mean(trialframes[10:t1-10], axis=0)
@@ -71,7 +72,9 @@ def compute_average(trialframes, t1=500, t2=1600):
     odor_normed[~ np.isfinite(odor_normed)] = odor_normed.min()
     return odor_normed
 
+
 def plot_signal(trialframes, t1, t2):
+
     blframes_mean = np.mean(trialframes[10:t1-10], axis=0)
     oframes = trialframes[t1+10:t2-10]
     oframes_seq = []
@@ -82,6 +85,7 @@ def plot_signal(trialframes, t1, t2):
     plt.plot([x for x in range(0, len(oframes_seq))], [np.mean(frame.astype('uint16')) for frame in oframes_seq])
     plt.show()
     pass
+
 
 def process_average(odor_normed,
                     lowpass=True,
@@ -129,7 +133,9 @@ def process_average(odor_normed,
     finalimage = np.reshape(a, (width, height))
     return finalimage
 
+
 def process_ref(mouse,date):
+
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_ref'.format(mouse,date)
     spotpath = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
     if not os.path.exists(spotpath):
@@ -147,7 +153,9 @@ def process_ref(mouse,date):
         cv2.imwrite(os.path.join(spotpath, 'ref_{0}_{1}_{2}.png'.format(mouse, date, tsmcount)), ref_average)
     return
 
+
 def process_single_odorant(mouse, date, odorant, ref=True):
+
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
     assert os.path.exists(path), 'File path not found!'
     spotpath = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
@@ -182,7 +190,9 @@ def process_single_odorant(mouse, date, odorant, ref=True):
     else:
         pass
 
+
 def process_imaging_sess(mouse, date):
+
     path = 'C:/Turbo-SM/SMDATA/'
     for imgfolder in os.listdir(path):
         if imgfolder.startswith('{0}_{1}'.format(mouse, date)):
