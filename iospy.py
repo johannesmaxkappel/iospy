@@ -137,6 +137,7 @@ def process_average(odor_normed,
 def process_ref(mouse,date):
 
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_ref'.format(mouse,date)
+    assert os.path.exists(path), 'File path not found!'
     spotpath = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
     if not os.path.exists(spotpath):
         os.makedirs(spotpath)
@@ -158,6 +159,7 @@ def process_single_odorant(mouse, date, odorant, ref=True):
 
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
     assert os.path.exists(path), 'File path not found!'
+
     spotpath = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
     if not os.path.exists(spotpath):
         os.makedirs(spotpath)
