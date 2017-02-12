@@ -53,10 +53,8 @@ def create_projection(img, imgname, imgsource, bmp=False):
 def shift_frame(img,rowshift, colshift):
 
     ### shifting rows and columns to move spots into FOS ###
-    try:
-        width, height = img.shape
-    except:
-        width, height, fuckthisshit = img.shape
+    width, height = img.shape
+
     print 'Rows shifted: {0}. Columns shifted: {1}.'.format(rowshift, colshift)
     img = np.insert(img, height, np.zeros((rowshift, width)), axis=0)
     img = np.insert(img, 0, np.zeros((colshift, height + rowshift)), axis=1)
@@ -80,6 +78,7 @@ def transform_masks(mouse, date, rowshift=0, colshift=0):
         elif imgname.startswith('Mask'):
             print 'Transforming image: {0}'.format(imgname)
             img = plt.imread(os.path.join(path, imgname))
+            assert len(img.shape) == 2, 'Data format not 2-dimensional!'
             assert len( np.unique( img ) ) == 2, 'Data format not binary!'
             img = shift_frame(img,rowshift,colshift)
             create_projection(img, imgname, path)
