@@ -53,7 +53,10 @@ def create_projection(img, imgname, imgsource, bmp=False):
 def shift_frame(img,rowshift, colshift):
 
     ### shifting rows and columns to move spots into FOS ###
-    width, height = img.shape
+    try:
+        width, height = img.shape
+    except:
+        width, height, fuckthisshit = img.shape
     print 'Rows shifted: {0}. Columns shifted: {1}.'.format(rowshift, colshift)
     img = np.insert(img, height, np.zeros((rowshift, width)), axis=0)
     img = np.insert(img, 0, np.zeros((colshift, height + rowshift)), axis=1)
