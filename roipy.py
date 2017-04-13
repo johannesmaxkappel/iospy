@@ -9,7 +9,7 @@ import cv2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-
+import zipfile
 
 def mask_image(img):
 
@@ -86,4 +86,32 @@ def transform_masks(mouse, date, rowshift=0, colshift=0):
             continue
     if not refimg:
         print 'WARNING: No reference image was shifted!'
+    pass
+
+def read_roi(fileobj):
+
+    if fileobj[:4] != 'Iout':
+        raise IOError('Magic number not found')
+
+    y1 = ord(fileobj[9:10])
+    x1 = ord(fileobj[11:12])
+    y2 = ord(fileobj[13:14])
+    x2 = ord(fileobj[15:16])
+
+    frame = np.zeros(256**2)
+    frame = frame.reshape(256, 256)
+    frame[y1:y2, x1:x2] = 255
+    return frame
+
+def create_masks(mouse, date, transform=True):
+
+    path = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
+    zf = zipfile.ZipFile(os.path.join(path,'RoiSet.zip'))
+    for roi in zf.namelist():
+        rfile = zf.open(roi, 'r')
+        fileobj = rfile.read()
+        frame = read_roi(fileobj)
+        cv2.imwrite(os.path.join(path, 'Mask_{0}.png'.format(roi[:3])), frame.astype('uint8'))
+        if transform:
+            create_projection(frame, 'Mask_{0}.png'.format(roi[:3]), path)
     pass

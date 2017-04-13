@@ -134,9 +134,9 @@ def process_average(odor_normed,
     return finalimage
 
 
-def process_ref(mouse,date):
+def process_ref(mouse,date, extension=''):
 
-    path = 'C:/Turbo-SM/SMDATA/{0}_{1}_ref'.format(mouse,date)
+    path = 'C:/Turbo-SM/SMDATA/{0}_{1}_ref{2}'.format(mouse,date,extension)
     assert os.path.exists(path), 'File path not found!'
     spotpath = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
     if not os.path.exists(spotpath):
@@ -155,7 +155,7 @@ def process_ref(mouse,date):
     return
 
 
-def process_single_odorant(mouse, date, odorant, ref=True):
+def process_single_odorant(mouse, date, odorant, ref=True, average=True):
 
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
     assert os.path.exists(path), 'File path not found!'
@@ -182,6 +182,8 @@ def process_single_odorant(mouse, date, odorant, ref=True):
         odor_averaged.append(odor_normed)
 
     if len(odor_averaged) > 1:
+        if not average:
+            pass
         average_final = np.mean(odor_averaged, axis=0)
         average_final = process_average(average_final, row1=5)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_averaged.tif'.format(mouse, date, odorant)), average_final)
