@@ -155,7 +155,7 @@ def process_ref(mouse,date, extension=''):
     return
 
 
-def process_single_odorant(mouse, date, odorant, ref=True, average=True):
+def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass=True):
 
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
     assert os.path.exists(path), 'File path not found!'
@@ -173,8 +173,8 @@ def process_single_odorant(mouse, date, odorant, ref=True, average=True):
         tsmcount += 1
         print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
         trialframes = read_data(os.path.join(path,tsm))
-        odor_normed = compute_average(trialframes,t1=500, t2=len(trialframes))
-        odor_final = process_average(odor_normed,row1=5)
+        odor_normed = compute_average(trialframes, t1=500, t2=len(trialframes))
+        odor_final = process_average(odor_normed, row1=0, lowpass=lowpass)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
         cv2.imwrite(os.path.join(spotpath, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
         plt.imshow(odor_final)
@@ -206,8 +206,3 @@ def process_imaging_sess(mouse, date):
             process_single_odorant(mouse, date, odorant, ref=False)
     process_ref(mouse, date)
     pass
-
-# def read_h5(mouse, date, session):
-#     for h5 in [x for x in os.listdir(self.path) if x.endswith('h5')]:
-#         odordict = h5py.File(os.path.join(self.path, h5), 'r')
-#         for trialno, odor in enumerate(odordict['Trials']['odor']):
