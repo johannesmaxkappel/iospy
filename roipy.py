@@ -40,6 +40,7 @@ def create_projection(img, imgname, imgsource, bmp=False):
     warpimg = cv2.warpPerspective(img, CAM2DMD, (684, 608), borderMode=1, borderValue=1)
     # switch rows and columns
     warpimg = np.transpose(warpimg)
+    print 'Transforming image: {0}'.format(imgname)
     for y, row in enumerate(warpimg):
         for x, value in enumerate(row):
             if not value in [0, 255]:
@@ -76,7 +77,6 @@ def transform_masks(mouse, date, rowshift=0, colshift=0):
             img = img.astype('uint16')
             cv2.imwrite(os.path.join(path, 'shifted_{0}.png'.format(imgname.split('.')[0])), img)
         elif imgname.startswith('Mask'):
-            print 'Transforming image: {0}'.format(imgname)
             img = plt.imread(os.path.join(path, imgname))
             assert len(img.shape) == 2, 'Data format not 2-dimensional!'
             assert len( np.unique( img ) ) == 2, 'Data format not binary!'
