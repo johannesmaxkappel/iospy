@@ -275,12 +275,12 @@ class Data:
         self.name = name
         path = 'R:\\Rinberglab\\rinberglabspace\\Users\\Johannes\\taar_stim\\behavior'
         assert os.path.exists(path), 'Network drive not connected!'
-        if not os.path.exists(os.path.join(path, 'mouse_data_{0}'.format(self.name))):
+        if not os.path.exists(os.path.join(path, 'mouse_data_{0}.p'.format(self.name))):
             self.mouse_data = {'8202': {}}
-            with open(os.path.join(path, 'mouse_data_{0}'.format(self.name)), 'wb') as f:
+            with open(os.path.join(path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
                 pickle.dump(self.mouse_data, f)
         else:
-            with open(os.path.join(path, 'mouse_data_{0}'.format(self.name)), 'rb') as f:
+            with open(os.path.join(path, 'mouse_data_{0}.p'.format(self.name)), 'rb') as f:
                 self.mouse_data = pickle.load(f)
         self.sw = sw
         self.thresh = thresh
@@ -305,7 +305,7 @@ class Data:
                     resdict = new_analyse(mouse, session, sw=self.sw, thresh=self.thresh)
                     self.mouse_data[mouse][session] = dict(resdict)
 
-        with open(os.path.join(path, 'mouse_data_{0}'.format(self.name)), 'wb') as f:
+        with open(os.path.join(path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
             pickle.dump(self.mouse_data, f)
 
     def plot_data(self, curve=True, probe=True):
