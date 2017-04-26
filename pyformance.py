@@ -323,7 +323,7 @@ class Data:
             for session in sessions:
                 for stim, result in self.mouse_data[mouse][session].items():
                     pdict[stim].append(result)
-
+            totalt = 0
             for stim, result in sorted(pdict.items()):
 
                 mix = stim.split('_')
@@ -336,14 +336,13 @@ class Data:
                 pea_c = round(float(stim.split('_')[0]) * 0.01, 2)
 
                 performance = []
-                total = 0
                 totalr = 0
                 silent = 0
                 left = 0
 
                 for [l, r, s] in result:
 
-                    total += l + r + s
+                    totalt += l + r + s
                     subtotal = l + r
                     totalr += subtotal
                     silent += s
@@ -361,7 +360,6 @@ class Data:
                 # plot mean
                 mean_l = float(left) / float(totalr)
                 scatter_m = ax.scatter([pea_c], [mean_l], color=colors[mode], marker='*', s=100, alpha=.9, label=mode)
-                print 'Mean pfm {0} for {1}, sw {2}, thresh {3}'.format(mean_l, stim, self.sw, self.thresh)
                 # calculate,plot binomial confidence intervals
                 confint = binomial_CI(left, totalr)
                 c = confint[1] - confint[0]
@@ -402,6 +400,7 @@ class Data:
             plt.savefig('MixtureAnalysis_{0}_{1}.pdf'.format(self.name, mouse), format='pdf', dpi=1200)
             plots.append(fig)
             plt.show()
+            print 'Total # trials:', totalt
         return plots
 
     def plot_accp(self, mice=[]):
@@ -449,3 +448,13 @@ class Data:
             plots.append(fig)
             plt.show()
         return plots
+
+    def calc_stats(self):
+
+        for mouse, sessions in sorted(self.mouse_data.items()):
+            for session in sorted(sessions):
+                total = 0
+                for stim, result in self.mouse_data[mouse][session].items():
+                    total += sum(result)
+                print mouse, session, 'Total # trials:', total
+        pass
