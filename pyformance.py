@@ -7,6 +7,7 @@ from scipy.optimize import minimize
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 def weibull(x, p):
 
@@ -273,14 +274,14 @@ class Data:
     def __init__(self, name, sw, thresh):
 
         self.name = name
-        path = 'R:\\Rinberglab\\rinberglabspace\\Users\\Johannes\\taar_stim\\behavior'
-        assert os.path.exists(path), 'Network drive not connected!'
-        if not os.path.exists(os.path.join(path, 'mouse_data_{0}.p'.format(self.name))):
+        self.path = 'R:\\Rinberglab\\rinberglabspace\\Users\\Johannes\\taar_stim\\behavior'
+        assert os.path.exists(self.path), 'Network drive not connected!'
+        if not os.path.exists(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name))):
             self.mouse_data = {'8202': {}}
-            with open(os.path.join(path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
+            with open(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
                 pickle.dump(self.mouse_data, f)
         else:
-            with open(os.path.join(path, 'mouse_data_{0}.p'.format(self.name)), 'rb') as f:
+            with open(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name)), 'rb') as f:
                 self.mouse_data = pickle.load(f)
         self.sw = sw
         self.thresh = thresh
@@ -305,7 +306,7 @@ class Data:
                     resdict = new_analyse(mouse, session, sw=self.sw, thresh=self.thresh)
                     self.mouse_data[mouse][session] = dict(resdict)
 
-        with open(os.path.join(path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
+        with open(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
             pickle.dump(self.mouse_data, f)
 
     def plot_data(self, curve=True, probe=True):
@@ -398,7 +399,7 @@ class Data:
             ax.set_ylabel('% responds like PEA', fontsize=12)
             sns.despine()
             sns.despine(left=True)
-            plt.savefig('MixtureAnalysis_{0}_{1}.pdf'.format(name, mouse), format='pdf', dpi=1200)
+            plt.savefig('MixtureAnalysis_{0}_{1}.pdf'.format(self.name, mouse), format='pdf', dpi=1200)
             plots.append(fig)
             plt.show()
         return plots
