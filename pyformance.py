@@ -278,7 +278,7 @@ class Data:
         if not os.path.exists(os.path.join(path, 'mouse_data_{0}'.format(self.name))):
             self.mouse_data = {'8202': {}}
             with open(os.path.join(path, 'mouse_data_{0}'.format(self.name)), 'wb') as f:
-                pickle.dump(mouse_data, f)
+                pickle.dump(self.mouse_data, f)
         else:
             with open(os.path.join(path, 'mouse_data_{0}'.format(self.name)), 'rb') as f:
                 self.mouse_data = pickle.load(f)
