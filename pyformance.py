@@ -360,7 +360,7 @@ class Data:
                 scatter = ax.scatter([pea_c] * len(performance), [performance], color=colors[mode], alpha=.3)
                 # plot mean
                 mean_l = float(left) / float(totalr)
-                scatter_m = ax.scatter([pea_c], [mean_l], color=colors[mode], marker='*', s=100, alpha=.9, label=mode)
+                scatter_m = ax.scatter([pea_c], [mean_l], color=colors[mode], marker='.', s=100, alpha=.9, label=mode)
                 # calculate,plot binomial confidence intervals
                 confint = binomial_CI(left, totalr)
                 c = confint[1] - confint[0]
