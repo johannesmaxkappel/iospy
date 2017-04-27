@@ -399,6 +399,7 @@ class Data:
             sns.despine()
             sns.despine(left=True)
             plt.savefig('MixtureAnalysis_{0}_{1}.pdf'.format(self.name, mouse), format='pdf', dpi=1200)
+            plt.savefig('MixtureAnalysis_{0}_{1}.png'.format(self.name, mouse), dpi=300)
             plots.append(fig)
             plt.show()
             print 'Total # trials:', totalt
