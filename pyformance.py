@@ -7,6 +7,7 @@ from scipy.optimize import minimize
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import seaborn as sns
+sns.set_style("white")
 import numpy as np
 
 def weibull(x, p):
@@ -364,8 +365,8 @@ class Data:
                 confint = binomial_CI(left, totalr)
                 c = confint[1] - confint[0]
                 c0 = confint[0] + c / 2
-                ax.errorbar([pea_c], [c0], yerr=c / 2, linestyle='None', color=colors[mode], alpha=.6)
-
+                errb = ax.errorbar([pea_c], [c0], yerr=c / 2, linestyle='None', color=colors[mode], alpha=.6)
+                errb[-1][0].set_linestyle('--')
                 if mode == 'odor':
                     x.append(float(pea_c))
                     n.append(float(totalr))
