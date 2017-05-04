@@ -318,9 +318,11 @@ class Data:
             fig, ax = plt.subplots(figsize=(10, 8))
             sdict = ddict(list)
             pdict = ddict(list)
-            x = []
-            n = []
-            k = []
+            # x = []
+            # n = []
+            # k = []
+            curvedict = ddict(lambda: [[],[],[]])
+
             for session in sessions:
                 for stim, result in self.mouse_data[mouse][session].items():
                     pdict[stim].append(result)
@@ -367,21 +369,28 @@ class Data:
                 c0 = confint[0] + c / 2
                 errb = ax.errorbar([pea_c], [c0], yerr=c / 2, linestyle='None', color=colors[mode], alpha=.6)
                 errb[-1][0].set_linestyle('--')
-                if mode == 'odor':
-                    x.append(float(pea_c))
-                    n.append(float(totalr))
-                    k.append(float(left))
-
+                # if mode == 'odor':
+                #     x.append(float(pea_c))
+                #     n.append(float(totalr))
+                #     k.append(float(left))
+                curvedict[mode][0].append(float(pea_c))
+                curvedict[mode][1].append(float(totalr))
+                curvedict[mode][2].append(float(left))
             # find curve fit
             if curve:
                 p_chris = [.5, 3.5, .01, 0.0]
-                data = [np.array(x), np.array(k), np.array(n)]
-                fit = find_fit(p_chris, data)
+                for mode in curvedict.keys():
+                    data = [
+                        np.array(curvedict[mode][0]),
+                        np.array(curvedict[mode][1]),
+                        np.array(curvedict[mode][2])
+                    ]
+                    fit = find_fit(p_chris, data)
 
-                if fit.success:
-                    x1 = np.arange(0., 1.01, 0.01)
-                    p = fit.x
-                    ax.plot(x1, weibull_chris(x1, p), alpha=.5)
+                    if fit.success:
+                        x1 = np.arange(0., 1.01, 0.01)
+                        p = fit.x
+                        ax.plot(x1, weibull_chris(x1, p), alpha=.5, color=colors[mode])
 
             handles, labels = plt.gca().get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
