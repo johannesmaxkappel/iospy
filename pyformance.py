@@ -318,7 +318,7 @@ class Data:
             fig, ax = plt.subplots(figsize=(10, 8))
             sdict = ddict(list)
             pdict = ddict(list)
-            # x = []
+            x = []
             # n = []
             # k = []
             curvedict = ddict(lambda: [[],[],[]])
@@ -369,8 +369,8 @@ class Data:
                 c0 = confint[0] + c / 2
                 errb = ax.errorbar([pea_c], [c0], yerr=c / 2, linestyle='None', color=colors[mode], alpha=.6)
                 errb[-1][0].set_linestyle('--')
-                # if mode == 'odor':
-                #     x.append(float(pea_c))
+                if mode == 'odor':
+                    x.append(float(pea_c))
                 #     n.append(float(totalr))
                 #     k.append(float(left))
                 curvedict[mode][0].append(float(pea_c))
