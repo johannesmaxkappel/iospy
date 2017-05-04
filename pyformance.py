@@ -319,8 +319,6 @@ class Data:
             sdict = ddict(list)
             pdict = ddict(list)
             x = []
-            # n = []
-            # k = []
             curvedict = ddict(lambda: [[],[],[]])
 
             for session in sessions:
@@ -371,8 +369,6 @@ class Data:
                 errb[-1][0].set_linestyle('--')
                 if mode == 'odor':
                     x.append(float(pea_c))
-                #     n.append(float(totalr))
-                #     k.append(float(left))
                 curvedict[mode][0].append(float(pea_c))
                 curvedict[mode][1].append(float(totalr))
                 curvedict[mode][2].append(float(left))
@@ -382,8 +378,8 @@ class Data:
                 for mode in curvedict.keys():
                     data = [
                         np.array(curvedict[mode][0]),
-                        np.array(curvedict[mode][1]),
-                        np.array(curvedict[mode][2])
+                        np.array(curvedict[mode][2]),
+                        np.array(curvedict[mode][1])
                     ]
                     fit = find_fit(p_chris, data)
 
