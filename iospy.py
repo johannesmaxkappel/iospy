@@ -82,7 +82,7 @@ def plot_signal(trialframes, t1, t2):
         oframe_r = (oframe - blframes_mean)/blframes_mean
         oframes_seq.append(np.mean(oframe_r))
 
-    plt.plot([x for x in range(0, len(oframes_seq))], [np.mean(frame.astype('uint16')) for frame in oframes_seq])
+    plt.plot([x for x in range(0, len(oframes_seq))], [np.mean(frame) for frame in oframes_seq])
     plt.show()
     pass
 
@@ -155,7 +155,7 @@ def process_ref(mouse,date, extension=''):
     return
 
 
-def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass=True):
+def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass=True, scale=85):
 
     path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
     assert os.path.exists(path), 'File path not found!'
@@ -174,7 +174,7 @@ def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass
         print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
         trialframes = read_data(os.path.join(path,tsm))
         odor_normed = compute_average(trialframes, t1=500, t2=len(trialframes))
-        odor_final = process_average(odor_normed, row1=0, lowpass=lowpass)
+        odor_final = process_average(odor_normed, row1=0, lowpass=lowpass, scale=scale)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
         cv2.imwrite(os.path.join(spotpath, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
         plt.imshow(odor_final)
@@ -195,14 +195,14 @@ def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass
         pass
 
 
-def process_imaging_sess(mouse, date):
-
-    path = 'C:/Turbo-SM/SMDATA/'
+def process_imaging_sess(mouse, date, path='', lowpass=False):
+    if path == '':
+        path = 'C:/Turbo-SM/SMDATA/'
     for imgfolder in os.listdir(path):
         if imgfolder.startswith('{0}_{1}'.format(mouse, date)):
             if imgfolder.endswith('ref'):
                 continue
             odorant = imgfolder.split('_')[2]
-            process_single_odorant(mouse, date, odorant, ref=False)
+            process_single_odorant(mouse, date, odorant, ref=False, lowpass=lowpass)
     process_ref(mouse, date)
     pass
