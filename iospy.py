@@ -155,9 +155,12 @@ def process_ref(mouse,date, extension=''):
     return
 
 
-def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass=True, scale=85):
+def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass=True, scale=85, path=''):
 
-    path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
+    if path == '':
+        path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
+    else:
+        path = os.path.join(path, '{0}_{1}_{2}'.format(mouse, date, odorant))
     assert os.path.exists(path), 'File path not found!'
 
     spotpath = 'C:/VoyeurData/{0}/spots/{1}'.format(mouse, date)
@@ -203,6 +206,6 @@ def process_imaging_sess(mouse, date, path='', lowpass=False):
             if imgfolder.endswith('ref'):
                 continue
             odorant = imgfolder.split('_')[2]
-            process_single_odorant(mouse, date, odorant, ref=False, lowpass=lowpass)
+            process_single_odorant(mouse, date, odorant, ref=False, lowpass=lowpass, path=path)
     process_ref(mouse, date)
     pass
