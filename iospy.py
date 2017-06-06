@@ -1,12 +1,11 @@
 '''
 Basic image processing functions for imaging data from NeuroCCD camera
 
-Copyright E.Chong & J.Kappel 2017
+Copyright J. Kappel & E.Chong 2017
 
 '''
 
-
-import scipy.ndimage.filters as filters
+from scipy.ndimage import fourier_gaussian
 import numpy as np
 from skimage import exposure
 import matplotlib.pyplot as plt
@@ -87,51 +86,71 @@ def plot_signal(trialframes, t1, t2):
     pass
 
 
-def process_average(odor_normed,
-                    lowpass=True,
-                    rescale_int=True,
-                    int_lower=2,
-                    int_upper=98,
-                    row1=0,
-                    row2=256,
-                    scale = 150
-                    ):
-    width, height = odor_normed.shape
-    # cut rows
-    odor_normed = odor_normed[row1:row2,]
+def rescale_int(im, lower=2, upper=98):
+
+    v_min, v_max = np.percentile(im, (lower, upper))
+    return exposure.rescale_intensity(im, in_range=(v_min, v_max))
+
+
+def normalize(im):
+
+    min_img = im - im.min()
+    return (min_img / min_img.max())
+
+
+def convert_dtype(im):
+
+    im = im * 2 ** 16
+    return im.astype('uint16')
+
+
+def process_im(im,
+               row1=0,
+               row2=256,
+               scale=85,
+               int_lower=2,
+               int_upper=98,
+               cut=(5,251),
+               bpass=True,
+               resc_int=True
+               ):
+    width, height = im.shape
+    odor_normed = im[cut[0]:cut[1], ]
     lframe = np.split(odor_normed, 2, axis=1)[0]
     rframe = np.split(odor_normed, 2, axis=1)[1]
     pframes = []
 
     for split in [lframe, rframe]:
+        split = normalize(split)
+        if resc_int:
+            split = rescale_int(split, lower=int_lower, upper=int_upper)
+        pframes.append(split)
 
-        if lowpass:
-            low_freq_component = filters.gaussian_filter( split, sigma = scale * 0.175 )
-            split = split - low_freq_component
-
-        # subtract baseline
-        min_img = split - split.min()
-        # normalize and 16bit convert
-        norm_img = ((min_img / min_img.max()) * (2 ** 16)).round()
-        # convert data type
-        bit16_img = norm_img.astype('uint16')
-
-        if rescale_int:
-            v_min, v_max = np.percentile(bit16_img, (int_lower, int_upper))
-            bit16_img = exposure.rescale_intensity(bit16_img, in_range=(v_min, v_max))
-
-        pframes.append(bit16_img)
-
-    #insert black rows to keep the shape
     a = np.concatenate(pframes, axis=1)
-    a = a.flatten()
-    r1 = np.zeros(width * (row1))
-    r2 = np.zeros(width * (width - row2))
+    if bpass:
+        a = bp_fft(a, scale=scale)
+        a = normalize(a)
+    a = np.ravel(a)
+
+    r1 = np.zeros(width * (cut[0]))
+    r2 = np.zeros(width * (width - cut[1]))
 
     a = np.insert(a, 0, r1, axis=0)
-    a = np.insert(a, row2, r2, axis=0)
-    finalimage = np.reshape(a, (width, height))
-    return finalimage
+    a = np.insert(a, cut[1] * width, r2, axis=0)
+
+    a = np.reshape(a, (width, height))
+    return a
+
+
+def bp_fft(im, scale=85):
+
+    sigma = scale * 0.15
+    input_im = np.fft.fft2(im)
+    low = fourier_gaussian(input_im, sigma=sigma)
+    input_im = input_im - low
+    high = fourier_gaussian(input_im, sigma=0.3)
+    highr = np.fft.ifft2(high)
+    return highr.real
 
 
 def process_ref(mouse,date, extension=''):
@@ -149,13 +168,23 @@ def process_ref(mouse,date, extension=''):
         print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
         ref_frames = read_data(os.path.join(path, tsm))
         ref_average = np.mean(ref_frames, axis=0)
-        ref_average = process_average(ref_average, lowpass=False)
+        ref_average = process_average(ref_average, bpass=False)
         cv2.imwrite(os.path.join(path, 'ref_{0}_{1}_{2}.png'.format(mouse, date, tsmcount)), ref_average)
         cv2.imwrite(os.path.join(spotpath, 'ref_{0}_{1}_{2}.png'.format(mouse, date, tsmcount)), ref_average)
     return
 
 
-def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass=True, scale=85, path=''):
+def process_single_odorant(mouse,
+                           date,
+                           odorant,
+                           ref=True,
+                           average=True,
+                           bpass=True,
+                           resc_int=True,
+                           scale=85,
+                           cut=(5,251),
+                           path=''
+                           ):
 
     if path == '':
         path = 'C:/Turbo-SM/SMDATA/{0}_{1}_{2}'.format(mouse, date, odorant)
@@ -177,7 +206,7 @@ def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass
         print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
         trialframes = read_data(os.path.join(path,tsm))
         odor_normed = compute_average(trialframes, t1=500, t2=len(trialframes))
-        odor_final = process_average(odor_normed, row1=0, lowpass=lowpass, scale=scale)
+        odor_final = process_im(odor_normed, cut=cut, bpass=bpass, scale=scale, resc_int=resc_int)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
         cv2.imwrite(os.path.join(spotpath, '{0}_{1}_{2}_trial{3}.tif'.format(mouse, date, odorant, tsmcount)), odor_final)
         plt.imshow(odor_final)
@@ -188,7 +217,7 @@ def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass
         if not average:
             pass
         average_final = np.mean(odor_averaged, axis=0)
-        average_final = process_average(average_final, row1=5)
+        average_final = process_im(average_final, cut=cut, bpass=bpass, scale=scale, resc_int=resc_int)
         cv2.imwrite(os.path.join(path, '{0}_{1}_{2}_averaged.tif'.format(mouse, date, odorant)), average_final)
         cv2.imwrite(os.path.join(spotpath, '{0}_{1}_{2}_averaged.tif'.format(mouse, date, odorant)), average_final)
         plt.imshow(average_final)
@@ -198,14 +227,21 @@ def process_single_odorant(mouse, date, odorant, ref=True, average=True, lowpass
         pass
 
 
-def process_imaging_sess(mouse, date, path='', lowpass=False):
+def process_imaging_sess(mouse,
+                         date,
+                         path='',
+                         bpass=True,
+                         resc_int = True,
+                         ref=False
+                         ):
     if path == '':
         path = 'C:/Turbo-SM/SMDATA/'
     for imgfolder in os.listdir(path):
         if imgfolder.startswith('{0}_{1}'.format(mouse, date)):
             if imgfolder.endswith('ref'):
                 continue
-            odorant = imgfolder.split('_')[2]
-            process_single_odorant(mouse, date, odorant, ref=False, lowpass=lowpass, path=path)
-    process_ref(mouse, date)
+            odorant = '_'.join(imgfolder.split('_')[2:])
+            process_single_odorant(mouse, date, odorant, ref=False, bpass=bpass, path=path, resc_int=resc_int)
+    if ref:
+        process_ref(mouse, date)
     pass
