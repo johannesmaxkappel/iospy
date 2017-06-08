@@ -105,8 +105,6 @@ def convert_dtype(im):
 
 
 def process_im(im,
-               row1=0,
-               row2=256,
                scale=85,
                int_lower=2,
                int_upper=98,
@@ -139,6 +137,7 @@ def process_im(im,
     a = np.insert(a, cut[1] * width, r2, axis=0)
 
     a = np.reshape(a, (width, height))
+    a = convert_dtype(a)
     return a
 
 
