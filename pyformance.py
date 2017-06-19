@@ -204,7 +204,7 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59, multiple_c=False
     lstims = [l for l in ldict.keys()]
     rstims = [l for l in rdict.keys()]
 
-    stimids = {
+    stimiddict = {
         'left' : [4, 9, 12, 15],
         'right' : [2, 5, 10, 15]
     }
@@ -224,7 +224,7 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59, multiple_c=False
 
         if 'DMDoff' in light:
             if multiple_c:
-                if int(stimid) in stimids[trialdir]:
+                if int(stimid) in stimiddict[trialdir]:
                     stimtype = '{0}_{1}'.format(cdict[str(conc)], '1.5')
                 else:
                     stimtype = cdict[str(conc)]
