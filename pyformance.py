@@ -170,7 +170,7 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59, multiple_c=False
     results = h5file['Trials']['result']
     concs = h5file['Trials']['odorconc']
     dmd = h5file['Trials']['stim_desc']
-    stimids =  h5file['Trials']['stimids']
+    stimids =  h5file['Trials']['stimid']
     lpfm = []
     rpfm = []
     tpfm = []
