@@ -152,7 +152,7 @@ def new_pfmcheck(pfm, sw, thresh):
         return True
 
 
-def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59):
+def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59, multiple_c=False):
 
     path = 'R:\\Rinberglab\\rinberglabspace\\Users\\Johannes\\taar_stim\\behavior'
     resdict = ddict(lambda: [0, 0, 0])
@@ -170,6 +170,7 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59):
     results = h5file['Trials']['result']
     concs = h5file['Trials']['odorconc']
     dmd = h5file['Trials']['stim_desc']
+    stimids =  h5file['Trials']['stimids']
     lpfm = []
     rpfm = []
     tpfm = []
@@ -199,15 +200,36 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59):
         '0.076': '38_62',
         '0.086': '43_57',
     }
+
     lstims = [l for l in ldict.keys()]
     rstims = [l for l in rdict.keys()]
+
+    stimids = {
+        'left' : [4, 9, 12, 15],
+        'right' : [2, 5, 10, 15]
+    }
     for rno, r in enumerate(results):
         if rno < sw:
             continue
         light = dmd[rno]
         conc = concs[rno]
+        stimid = stimids[rno]
+        if conc in lstims:
+            trialdir = 'left'
+        elif conc in rstims:
+            trialdir = 'right'
+        else:
+            print 'Concentration not found in cdict:', conc
+            break
+
         if 'DMDoff' in light:
-            stimtype = cdict[str(conc)]
+            if multiple_c:
+                if int(stimid) in stimids[trialdir]:
+                    stimtype = '{0}_{1}'.format(cdict[str(conc)], '1.5')
+                else:
+                    stimtype = cdict[str(conc)]
+            else:
+                stimtype = cdict[str(conc)]
         else:
             stimtype = '{0}_{1}'.format(cdict[str(conc)], light[:2])
 
@@ -276,9 +298,10 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59):
 
 class Data:
 
-    def __init__(self, name, sw, thresh):
+    def __init__(self, name, sw, thresh, multiple_c=False):
 
         self.name = name
+        self.multiple_c = multiple_c
         self.path = 'R:\\Rinberglab\\rinberglabspace\\Users\\Johannes\\taar_stim\\behavior'
         assert os.path.exists(self.path), 'Network drive not connected!'
         if not os.path.exists(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name))):
@@ -308,7 +331,7 @@ class Data:
                 if session in self.mouse_data[mouse].keys():
                     continue
                 else:
-                    resdict = new_analyse(mouse, session, sw=self.sw, thresh=self.thresh)
+                    resdict = new_analyse(mouse, session, sw=self.sw, thresh=self.thresh, multiple_c=self.multiple_c)
                     self.mouse_data[mouse][session] = dict(resdict)
 
         with open(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
@@ -317,7 +340,7 @@ class Data:
     def plot_data(self, curve=True, probe=True):
 
         plots = []
-        colors = {'odor + T3 stim': 'r', 'odor + T4 stim': 'g', 'odor': 'b'}
+        colors = {'odor + T3 stim': 'r', 'odor + T4 stim': 'g', 'odor': 'b', 'odor 1.5-fold': 'c'}
         for mouse, sessions in sorted(self.mouse_data.items()):
             fig, ax = plt.subplots(figsize=(10, 8))
             sdict = ddict(list)
@@ -334,8 +357,13 @@ class Data:
                 mix = stim.split('_')
                 if len(mix) < 3:
                     mode = 'odor'
+                elif mix[2] == '1.5':
+                    mode = 'odor 1.5-fold'
                 elif probe:
-                    mode = 'odor + {0} stim'.format(mix[2])
+                    if 'T' in mix[2]:
+                        mode = 'odor + {0} stim'.format(mix[2])
+                    else:
+                        continue
                 else:
                     continue
                 pea_c = round(float(stim.split('_')[0]) * 0.01, 2)
