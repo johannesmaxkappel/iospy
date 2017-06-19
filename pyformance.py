@@ -214,12 +214,12 @@ def new_analyse(mouse, session, plot=False, sw=20, thresh=0.59, multiple_c=False
         light = dmd[rno]
         conc = concs[rno]
         stimid = stimids[rno]
-        if conc in lstims:
+        if str(conc) in lstims:
             trialdir = 'left'
-        elif conc in rstims:
+        elif str(conc) in rstims:
             trialdir = 'right'
         else:
-            print 'Concentration not found in cdict:', conc
+            print 'Concentration not found in cdict:', str(conc)
             break
 
         if 'DMDoff' in light:
