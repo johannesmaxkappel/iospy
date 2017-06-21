@@ -167,7 +167,7 @@ def process_ref(mouse,date, extension=''):
         print 'processing file no. {0}: {1}'.format(tsmcount, tsm)
         ref_frames = read_data(os.path.join(path, tsm))
         ref_average = np.mean(ref_frames, axis=0)
-        ref_average = process_average(ref_average, bpass=False)
+        ref_average = process_im(ref_average, bpass=False, cut=(0,256))
         cv2.imwrite(os.path.join(path, 'ref_{0}_{1}_{2}.png'.format(mouse, date, tsmcount)), ref_average)
         cv2.imwrite(os.path.join(spotpath, 'ref_{0}_{1}_{2}.png'.format(mouse, date, tsmcount)), ref_average)
     return
