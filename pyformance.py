@@ -337,7 +337,7 @@ class Data:
         with open(os.path.join(self.path, 'mouse_data_{0}.p'.format(self.name)), 'wb') as f:
             pickle.dump(self.mouse_data, f)
 
-    def plot_data(self, curve=True, probe=True):
+    def plot_data(self, curve=True, probe=True, multiple_c=False, probe_curve=False):
 
         plots = []
         colors = {'odor + T3 stim': 'r', 'odor + T4 stim': 'g', 'odor': 'b', 'odor 1.5-fold': 'c'}
@@ -367,7 +367,9 @@ class Data:
                 else:
                     continue
                 pea_c = round(float(stim.split('_')[0]) * 0.01, 2)
-
+                if not multiple_c:
+                    if mode == 'odor 1.5-fold':
+                        continue
                 performance = []
                 totalr = 0
                 silent = 0
@@ -401,6 +403,9 @@ class Data:
                 errb[-1][0].set_linestyle('--')
                 if mode == 'odor':
                     x.append(float(pea_c))
+                if not probe_curve:
+                    if 'stim' in mode:
+                        continue
                 curvedict[mode][0].append(float(pea_c))
                 curvedict[mode][1].append(float(totalr))
                 curvedict[mode][2].append(float(left))
