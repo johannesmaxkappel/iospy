@@ -413,12 +413,12 @@ class Data:
             if curve:
                 p_chris = [.5, 3.5, .01, 0.0]
                 for mode in curvedict.keys():
-                    data = [
+                    fdata = [
                         np.array(curvedict[mode][0]),
                         np.array(curvedict[mode][2]),
                         np.array(curvedict[mode][1])
                     ]
-                    fit = find_fit(p_chris, data)
+                    fit = find_fit(p_chris, fdata)
 
                     if fit.success:
                         x1 = np.arange(0., 1.01, 0.01)
@@ -446,6 +446,98 @@ class Data:
             plt.show()
             print 'Total # trials:', totalt
         return plots
+
+    def plot_av(self, curve=True, probe=True, multiple_c=False, probe_curve=False, scatter=False):
+
+        avdata = ddict(lambda: np.array([0, 0, 0]))
+        for mouse in self.mouse_data.keys():
+
+            for date in self.mouse_data[mouse].keys():
+
+                for r in self.mouse_data[mouse][date].keys():
+                    avdata[r] += np.array(self.mouse_data[mouse][date][r])
+        colors = {'odor + T3 stim': 'r', 'odor + T4 stim': 'g', 'odor': 'b', 'odor 1.5-fold': 'c'}
+        totalt = 0
+        x = []
+        fig, ax = plt.subplots(figsize=(10, 8))
+        curvedict = ddict(lambda: [[], [], []])
+        probe = True
+        probe_curve = True
+        for stim, result in sorted(avdata.items()):
+            print stim, result
+            mix = stim.split('_')
+            if len(mix) < 3:
+                mode = 'odor'
+            elif mix[2] == '1.5':
+                mode = 'odor 1.5-fold'
+            elif probe:
+                if 'T' in mix[2]:
+                    mode = 'odor + {0} stim'.format(mix[2])
+                else:
+                    continue
+            else:
+                continue
+            pea_c = round(float(stim.split('_')[0]) * 0.01, 2)
+
+            performance = []
+            [l, r, s] = result
+
+            total = l + r + s
+            totalt += l + r + s
+            subtotal = l + r
+
+            # plot mean
+            mean_l = float(l) / float(subtotal)
+            scatter_m = ax.scatter([pea_c], [mean_l], color=colors[mode], marker='.', s=200, alpha=.9, label=mode)
+            # calculate,plot binomial confidence intervals
+            confint = binomial_CI(l, total)
+            c = confint[1] - confint[0]
+            c0 = confint[0] + c / 2
+            errb = ax.errorbar([pea_c], [c0], yerr=c / 2, linestyle='None', color=colors[mode], alpha=.6)
+            errb[-1][0].set_linestyle('--')
+            if mode == 'odor':
+                x.append(float(pea_c))
+            if not probe_curve:
+                if 'stim' in mode:
+                    continue
+            curvedict[mode][0].append(float(pea_c))
+            curvedict[mode][1].append(float(subtotal))
+            curvedict[mode][2].append(float(l))
+        # find curve fit
+
+        p_chris = [.5, 3.5, .01, 0.0]
+        for mode in curvedict.keys():
+            fdata = [
+                np.array(curvedict[mode][0]),
+                np.array(curvedict[mode][2]),
+                np.array(curvedict[mode][1])
+            ]
+            fit = find_fit(p_chris, fdata)
+
+            if fit.success:
+                x1 = np.arange(0., 1.01, 0.01)
+                p = fit.x
+                ax.plot(x1, weibull_chris(x1, p), alpha=.5, color=colors[mode])
+
+        handles, labels = plt.gca().get_legend_handles_labels()
+        by_label = OrderedDict(zip(labels, handles))
+        ax.legend(by_label.values(), by_label.keys(), loc='lower right')
+
+        ax.set_title('Average')
+        ax.set_xlim(0, 1.0)
+        x.append(0.0)
+        x.append(1.0)
+        ax.set_xticks([x0 for x0 in x])
+        ax.set_yticks([y for y in np.arange(0.0, 1.1, 0.1)])
+        ax.set_ylim(0, 1.05)
+        ax.set_xlabel('% PEA in PEA/IPA', fontsize=12)
+        ax.set_ylabel('% responds like PEA', fontsize=12)
+        sns.despine()
+        sns.despine(left=True)
+        plt.savefig('MixtureAnalysis_{0}_{1}.pdf'.format(self.name, 'average'), format='pdf', dpi=1200)
+        plt.savefig('MixtureAnalysis_{0}_{1}.png'.format(self.name, 'average'), dpi=300)
+        plt.show()
+        print 'Total # trials:', totalt
 
     def plot_accp(self, mice=[]):
 
