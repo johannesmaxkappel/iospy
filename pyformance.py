@@ -464,7 +464,7 @@ class Data:
         probe = True
         probe_curve = True
         for stim, result in sorted(avdata.items()):
-            print stim, result
+
             mix = stim.split('_')
             if len(mix) < 3:
                 mode = 'odor'
@@ -500,6 +500,8 @@ class Data:
             if not probe_curve:
                 if 'stim' in mode:
                     continue
+                    print mode, probe_curve
+            print mode, probe_curve
             curvedict[mode][0].append(float(pea_c))
             curvedict[mode][1].append(float(subtotal))
             curvedict[mode][2].append(float(l))
