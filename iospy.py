@@ -49,7 +49,7 @@ def read_data(filepath, dFrame = True):
 
         frame = pixels[frameno * nPixels:(frameno + 1) * nPixels]
         frame = np.reshape(frame, (width, height))
-        frame = frame.astype('uint16')
+        frame = frame.astype('float64')
 
         trialframes.append(frame)
 
@@ -108,7 +108,7 @@ def process_im(im,
                scale=85,
                int_lower=2,
                int_upper=98,
-               cut=(5,251),
+               cut=(0,256),
                bpass=True,
                resc_int=True
                ):
@@ -128,15 +128,16 @@ def process_im(im,
     if bpass:
         a = bp_fft(a, scale=scale)
         a = normalize(a)
-    a = np.ravel(a)
+    if cut != (0,256):
+        a = np.ravel(a)
 
-    r1 = np.zeros(width * (cut[0]))
-    r2 = np.zeros(width * (width - cut[1]))
+        r1 = np.zeros(width * (cut[0]))
+        r2 = np.zeros(width * (width - cut[1]))
 
-    a = np.insert(a, 0, r1, axis=0)
-    a = np.insert(a, cut[1] * width, r2, axis=0)
+        a = np.insert(a, 0, r1, axis=0)
+        a = np.insert(a, cut[1] * width, r2, axis=0)
 
-    a = np.reshape(a, (width, height))
+        a = np.reshape(a, (width, height))
     a = convert_dtype(a)
     return a
 
